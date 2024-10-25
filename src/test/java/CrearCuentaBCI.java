@@ -1,14 +1,12 @@
 package scripts;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 
 public class CrearCuentaBCI {
+
     public static void main(String[] args) throws InterruptedException {
         String rutaProyecto = System.getProperty("user.dir");
         String rutaDriver = rutaProyecto +
@@ -22,7 +20,7 @@ public class CrearCuentaBCI {
         driver.get("https://www.bci.cl/personas");
         driver.manage().window().maximize();
         //espere 5 segundos
-        Thread.sleep(5000);
+        Thread.sleep(2000);
 
 
         //clic al boton Hazte cliente
@@ -31,7 +29,7 @@ public class CrearCuentaBCI {
         btnNuevoCliente = driver.findElement(byBtnNuevoCliente);
         btnNuevoCliente.click();
 
-        Thread.sleep(10000);
+        Thread.sleep(5000);
 
         //ingreso rut
         // Cambia al iframe que contiene el campo de RUT
@@ -42,47 +40,55 @@ public class CrearCuentaBCI {
 
         // Ingresa el RUT
         rutField.sendKeys("5.204.595-9");
-        Thread.sleep(3000);
+        Thread.sleep(1000);
         rutField.sendKeys(Keys.TAB);
 
         //ingreso numero de documento
 
-       // driver.switchTo().frame("frame");
-
         WebElement NumSerie = driver.findElement(By.xpath("//input[contains(@placeholder,'Ingresa n')]"));
         NumSerie.sendKeys("847.939.376");
+        Thread.sleep(1000);
+        //ingreso telefono
+        WebElement NumTel = driver.findElement(By.xpath("//input[contains(@placeholder,'Ingresa tu tel')]"));
+        NumTel.sendKeys("74834503");
+        Thread.sleep(1000);
+
+        //ingreso correo
+        WebElement email = driver.findElement(By.xpath("//input[contains(@placeholder,'Ingresa tu ema')]"));
+        email.sendKeys("cuentadecorreo@tucuenta.cl");
+        Thread.sleep(1000);
+
+        //ingreso confirma correo
+        WebElement REemail = driver.findElement(By.xpath("//input[@placeholder='Vuelve a ingresar tu email']"));
+        REemail.sendKeys("cuentadecorreo@tucuenta.cl");
+        Thread.sleep(1000);
+        REemail.sendKeys(Keys.TAB);
 
 
+        //mover scroll
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        // Scroll hacia abajo 500 píxeles
+        js.executeScript("window.scrollBy(0, 500);");
+        Thread.sleep(2000);
+        // chek en politicas de privacidad
+
+        driver.findElement(By.xpath("//*[@id=\"contenedorApp\"]/div/div/app-datos-basicos/form/div/div[2]/bci-wk-checkbox")).click();
+        Thread.sleep(2000);
 
 
+        //clic en boton continuar
 
-        //WebElement inputRut = driver.findElement(By.xpath("//input[@placeholder='Ingresa tu RUT']"));
-        //inputRut.sendKeys("5.204.695-9");  // Aquí ingresas el RUT que desees
-
-
-
-
-        //driver.findElement(By.id("_ngcontent-mgm-c38")).sendKeys("5.205.595-9");
-
-       //WebElement inputRut = driver.findElement(By.xpath("//input[contains(@placeholder,'Ingresa tu Rut')]);
-       // WebElement labelRut = driver.findElement(By.xpath('//label[@_ngcontent-mgm-c38]'"//text"));
-
-          //      WebElement labelMarketing = driver.findElement(By.xpath("//label[@for='checkbox-marketing']"));
-        //labelRut.sendKeys("5.205.595-9");
-
+        WebElement botonContinuar = driver.findElement(By.xpath("//button[text()='Continuar']"));
+        botonContinuar.click();
 
 
         Thread.sleep(2000);
+
+
+
+
 /*
-
-        //clic en boton siguiente
-        WebElement btnSiguiente1;
-        By byBtnSiguiente1 = By.xpath("//button[@data-testid=\"submit\"]");
-        btnSiguiente1 = driver.findElement(byBtnSiguiente1);
-        btnSiguiente1.click();
-
-        Thread.sleep(2000);
-
         // paso 1 de 3
         // crear contraseña
         driver.findElement(By.id("new-password")).sendKeys("ksie929a7u");
