@@ -13,8 +13,8 @@ public class CatalogoLibrosTest {
 
     private static WebDriver driver;
 
-    @BeforeAll
-    public static void setUp() {
+    @BeforeEach
+    public void setUp() {
         String rutaProyecto = System.getProperty("user.dir");
         String rutaDriver = rutaProyecto + "\\src\\test\\resources\\drivers\\chromedriver.exe";
         System.setProperty("webdriver.chrome.driver", rutaDriver);
@@ -23,8 +23,8 @@ public class CatalogoLibrosTest {
         driver.get("https://catalogotextos.mineduc.cl/catalogo-textos/login/login?tipo=ee");
     }
 
-    @AfterAll
-    public static void tearDown() {
+    @AfterEach
+    public void tearDown() {
         if (driver != null) {
             driver.quit();
         }
