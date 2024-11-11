@@ -18,3 +18,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+tasks.test {
+    reports {
+        html.required.set(false)
+    }
+}
+

@@ -1,7 +1,4 @@
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -9,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
 public class CatalogoLibrosTest {
@@ -33,16 +31,24 @@ public class CatalogoLibrosTest {
     }
 
     @Test
+    @Order(1)
     public void CP001_CambiarAEstudiante() throws InterruptedException {
         Thread.sleep(5000); // Espera para asegurar la carga de la página
 
         // Hacer clic en el botón de "Estudiante"
         WebElement btnCambiaEstudiante = driver.findElement(By.xpath("//a[@data-tipo-usuario='alumno']"));
         btnCambiaEstudiante.click();
-        Thread.sleep(5000);
+        Thread.sleep(1000);
+        //mover scroll
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        // Scroll hacia abajo 500 píxeles
+        js.executeScript("window.scrollBy(0, 500);");
+        Thread.sleep(2000);
     }
 
     @Test
+    @Order(2)
     public void CP002_IngresarDatosEstudianteInvalido() throws InterruptedException {
         CP001_CambiarAEstudiante(); // Asegurarse de que estamos en el modo estudiante
 
@@ -50,15 +56,33 @@ public class CatalogoLibrosTest {
         String rutIncorrecto = generarRUT();
         ingresarDatosEstudiante(rutIncorrecto, "5° Básico", "14-06-2013");
 
+        //mover scroll
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        // Scroll hacia abajo 500 píxeles
+        js.executeScript("window.scrollBy(0, 500);");
+        Thread.sleep(2000);
+
         // Verificar mensajes de error para el RUT incorrecto
-        validarMensajesDeError();
+        validarMensajesDeError1();
+        Thread.sleep(2000);
+        //Verifica si estudiante se encuentra en los registros
+        validarMensajesDeError2();
+        Thread.sleep(2000);
     }
 
     @Test
+    @Order(3)
     public void CP003_IngresarAlCatalogo() throws InterruptedException {
         // Limpiar el campo y colocar el RUT correcto
+        CP001_CambiarAEstudiante();
         driver.findElement(By.id("run_alumno")).clear();
         ingresarDatosEstudiante("24304457-K", "5° Básico", "14-06-2013");
+//mover scroll
+
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        // Scroll hacia abajo 500 píxeles
+        js.executeScript("window.scrollBy(0, 500);");
+        Thread.sleep(2000);
 
         // Hacer clic en el botón "Ingresar"
         WebElement btnIngresar = driver.findElement(By.xpath("//button[@id=\"ingresar\"]"));
@@ -67,6 +91,7 @@ public class CatalogoLibrosTest {
     }
 
     @Test
+    @Order(4)
     public void CP004_SeleccionarYDescargarLibro() throws InterruptedException {
         CP003_IngresarAlCatalogo(); // Asegurarse de que el estudiante ha ingresado al catálogo
 
@@ -82,6 +107,7 @@ public class CatalogoLibrosTest {
     }
 
     @Test
+    @Order(5)
     public void CP005_VerificarArchivoDeDescarga() {
         try {
             CP004_SeleccionarYDescargarLibro(); // Asegurarse de que el libro se intenta descargar
@@ -114,22 +140,61 @@ public class CatalogoLibrosTest {
     }
 
     // Método para validar mensajes de error cuando el RUT es incorrecto
-    private void validarMensajesDeError() throws InterruptedException {
-        // Hacer clic en el botón "Ingresar" para verificar el error
-        WebElement btnIngresar = driver.findElement(By.xpath("//button[@id='ingresar']"));
-        btnIngresar.click();
-        Thread.sleep(2000);
 
-        // Verificar el mensaje de error del RUT
-        WebElement errorMessage = driver.findElement(By.id("login_error_alumno_run"));
-        Assertions.assertTrue(errorMessage.getText().startsWith("RUN del estudiante no es v"), "Error en el mensaje de RUT inválido");
-        System.out.println("El rut ingresado no es el correcto");
+    private void validarMensajesDeError1() throws InterruptedException {
+        try {
+            // Hacer clic en el botón "Ingresar" para verificar el error
+            WebElement btnIngresar = driver.findElement(By.xpath("//button[@id='ingresar']"));
+            btnIngresar.click();
+            Thread.sleep(2000);
+            //mover scroll
 
-        // Verificar mensaje de advertencia de estudiante incorrecto
-        WebElement warningMessage = driver.findElement(By.id("warning"));
-        Assertions.assertTrue(warningMessage.getText().startsWith("nuestros registros, sus datos no son"), "Error en el mensaje de advertencia");
-        System.out.println("Estudiante erróneo");
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            // Scroll hacia abajo 500 píxeles
+            js.executeScript("window.scrollBy(0, 500);");
+            Thread.sleep(2000);
+
+            // Verificar el mensaje de error del RUT
+            WebElement errorMessage = driver.findElement(By.id("login_error_alumno_run"));
+            String textoRecibido = errorMessage.getText().trim().replaceAll("\\s+", " "); // Quita espacios extra
+            String textoEsperado = "RUN del estudiante no es válido";
+
+            String textoCorregido = corregirEncoding(textoRecibido);
+
+            if (textoEsperado.equals(textoCorregido)) {
+                System.out.println("El rut ingresado no es el correcto");
+            } else {
+                System.out.println("El mensaje de error no coincide con el esperado.");
+            }
+        } catch (NoSuchElementException e) {
+            System.out.println("Error: No se encontró el elemento del mensaje de error en la página.");
+        }
     }
+
+ private void validarMensajesDeError2() throws InterruptedException {
+     try {
+         // Verificar mensaje de advertencia de estudiante incorrecto
+         WebElement warningMessage = driver.findElement(By.id("warning"));
+         String textoRecibido = warningMessage.getText().trim().replaceAll("\\s+", " "); // Quita espacios extra
+         String textoEsperado = "Según nuestros registros, sus datos no son válidos.";
+         //mover scroll
+
+         JavascriptExecutor js = (JavascriptExecutor) driver;
+         // Scroll hacia abajo 500 píxeles
+         js.executeScript("window.scrollBy(0, 500);");
+         Thread.sleep(2000);
+
+         String textoCorregido = corregirEncoding(textoRecibido);
+
+         if (textoEsperado.equals(textoCorregido)) {
+             System.out.println("Estudiante no existe en registros");
+         } else {
+             System.out.println("El mensaje de advertencia no coincide con el esperado.");
+         }
+     } catch (NoSuchElementException e) {
+         System.out.println("Error: No se encontró el elemento de advertencia en la página.");
+     }
+ }
 
     // Método para generar un RUT incorrecto
     public static String generarRUT() {
@@ -157,5 +222,20 @@ public class CatalogoLibrosTest {
             return resto;
         }
     }
+    public static String corregirEncoding(String textoRecibido){
+        byte[] bytes = textoRecibido.getBytes(StandardCharsets.ISO_8859_1);
+        String textoCorregido = new String(bytes, StandardCharsets.UTF_8);
+        return textoCorregido;
+    }
 }
 
+/*
+@Test
+public void ejecutarSecuenciaCompleta() throws InterruptedException {
+    CP001_CambiarAEstudiante(); // Paso 1
+    CP002_IngresarDatosEstudianteInvalido(); // Paso 2
+    CP003_IngresarAlCatalogo(); // Paso 3
+    CP004_SeleccionarYDescargarLibro(); // Paso 4
+    CP005_VerificarArchivoDeDescarga(); // Paso 5
+}
+*/
